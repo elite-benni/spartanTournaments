@@ -3,6 +3,8 @@
 import { defineConfig } from 'vite';
 import analog from '@analogjs/platform';
 import tailwindcss from '@tailwindcss/vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import { resolve } from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -11,10 +13,20 @@ export default defineConfig(({ mode }) => ({
   },
   resolve: {
     mainFields: ['module'],
+    alias: {
+      'calc-tournament': resolve(__dirname, 'libs/calc-tournament/src/index.ts'),
+    },
   },
   plugins: [
-    analog(),
-    tailwindcss()
+    analog({
+      nitro: {
+        alias: {
+          'calc-tournament': resolve(__dirname, 'libs/calc-tournament/src/index.ts'),
+        },
+      },
+    }),
+    tailwindcss(),
+    tsconfigPaths(),
   ],
   test: {
     globals: true,
