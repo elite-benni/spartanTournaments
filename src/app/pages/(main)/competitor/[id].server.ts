@@ -15,10 +15,12 @@ export const load = async ({ event, params }: PageServerLoad) => {
 
   const groupId = competitor.groupID ?? 0;
 
-  const [joinedPairings, allGps, groups] = await Promise.all([
+  // Fetch GamePoints once and share them with the standings calc, so the page
+  // doesn't scan the table twice.
+  const allGps = await db.select().from(gamePoints);
+  const [joinedPairings, groups] = await Promise.all([
     PairingReads.findPairings(db, { competitorId: id }),
-    db.select().from(gamePoints),
-    groupId > 0 ? TournamentStandings.getGroupsStandings(db, id) : Promise.resolve([]),
+    groupId > 0 ? TournamentStandings.getGroupsStandings(db, id, allGps) : Promise.resolve([]),
   ]);
 
   return {

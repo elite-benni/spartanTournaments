@@ -1,13 +1,19 @@
-import { eq, or, and, between } from 'drizzle-orm';
+import { eq, or, and, between, gt, isNull } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { sub, add } from 'date-fns';
-import { db, pairings, competitors, type DbOrTx } from './db';
+import { db, pairings, competitors, gamePoints, type DbOrTx } from './db';
 
 export interface PairingFilter {
   /** Only Pairings this Competitor plays in (either side). */
   competitorId?: number;
+  /** Only the single Pairing with this id. */
+  pairingId?: number;
   /** Only Pairings whose startTime falls within [from, to]. */
   startTimeBetween?: { from: Date; to: Date };
+  /** Only Pairings where both Competitor slots are filled (id > 0). */
+  bothCompetitorsAssigned?: boolean;
+  /** Only Pairings with no GamePoint recorded yet (i.e. not yet played). */
+  unplayedOnly?: boolean;
 }
 
 /** A Pairing enriched with both Competitors' id and name. */
@@ -48,13 +54,19 @@ export class PairingReads {
         )
       );
     }
+    if (filter.pairingId != null) {
+      conditions.push(eq(pairings.id, filter.pairingId));
+    }
     if (filter.startTimeBetween) {
       conditions.push(
         between(pairings.startTime, filter.startTimeBetween.from, filter.startTimeBetween.to)
       );
     }
+    if (filter.bothCompetitorsAssigned) {
+      conditions.push(gt(pairings.competitor1ID, 0), gt(pairings.competitor2ID, 0));
+    }
 
-    return tx
+    let query: any = tx
       .select({
         id: pairings.id,
         gamenumber: pairings.gamenumber,
@@ -69,7 +81,16 @@ export class PairingReads {
       })
       .from(pairings)
       .leftJoin(c1, eq(pairings.competitor1ID, c1.id))
-      .leftJoin(c2, eq(pairings.competitor2ID, c2.id))
+      .leftJoin(c2, eq(pairings.competitor2ID, c2.id));
+
+    // "Unplayed" = no GamePoint references this Pairing. The left join + IS NULL
+    // keeps only Pairings with zero results, without multiplying played rows.
+    if (filter.unplayedOnly) {
+      query = query.leftJoin(gamePoints, eq(pairings.id, gamePoints.pairingID));
+      conditions.push(isNull(gamePoints.id));
+    }
+
+    return query
       .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(pairings.startTime, pairings.court);
   }

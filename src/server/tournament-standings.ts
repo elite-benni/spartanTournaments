@@ -3,15 +3,18 @@ import { competitors, pairings, gamePoints } from './db/schema';
 import { toCalcCompetitor } from './db/calc-mappers';
 import { calcAllMatchPoints, type CalcCompetitor, type CalcGroup } from 'calc-tournament';
 
+type GamePointRow = typeof gamePoints.$inferSelect;
+
 export class TournamentStandings {
   static async getGroupsStandings(
     tx: DbOrTx = db,
-    competitorFilter: number = 0
+    competitorFilter: number = 0,
+    preloadedGamePoints?: GamePointRow[]
   ): Promise<CalcGroup[]> {
     const [allComps, allPairings, allGps] = await Promise.all([
       tx.select().from(competitors),
       tx.select().from(pairings),
-      tx.select().from(gamePoints),
+      preloadedGamePoints ?? tx.select().from(gamePoints),
     ]);
 
     const calcComps: CalcCompetitor[] = allComps.map(toCalcCompetitor);

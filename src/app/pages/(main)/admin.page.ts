@@ -340,7 +340,7 @@ export default class AdminPage {
       return;
     }
 
-    if (!(await this.dialogService.confirm('Spiele verschieben', `Möchtest du alle ungespielten Spiele wirklich um ${minutes} Minuten verschieben?`))) return;
+    if (!(await this.dialogService.confirm('Spiele verschieben', `Möchtest du alle ungespielten Spiele wirklich um ${minutes} Minuten verschieben?`, true))) return;
 
     await this.runAction(
       () => firstValueFrom(this.http.post('/api/actions/postpone-games', { minutes })),

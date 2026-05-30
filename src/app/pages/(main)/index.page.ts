@@ -1,11 +1,10 @@
-import { Component, computed, inject, resource, PLATFORM_ID, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { injectLoad } from '@analogjs/router';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
 import type { load } from './index.server';
 import { getPhaseName } from '../../shared/phase-name';
+import { injectLivePairings } from '../../shared/live-pairings';
 
 type ActivePairing = Awaited<ReturnType<typeof load>>[number];
 
@@ -58,24 +57,9 @@ type ActivePairing = Awaited<ReturnType<typeof load>>[number];
   `,
 })
 export default class HomeComponent {
-  private http = inject(HttpClient);
-  private platformId = inject(PLATFORM_ID);
-  private destroyRef = inject(DestroyRef);
-
   private ssrData = toSignal(injectLoad<typeof load>(), { initialValue: [] as ActivePairing[] });
 
-  private liveResource = resource({
-    loader: () => firstValueFrom(this.http.get<ActivePairing[]>('/api/pairings/active')),
-  });
-
-  activePairings = computed(() => this.liveResource.value() ?? this.ssrData());
+  activePairings = injectLivePairings<ActivePairing[]>('/api/pairings/active', this.ssrData);
 
   protected getPhaseName = getPhaseName;
-
-  constructor() {
-    if (isPlatformBrowser(this.platformId)) {
-      const intervalId = setInterval(() => this.liveResource.reload(), 30_000);
-      this.destroyRef.onDestroy(() => clearInterval(intervalId));
-    }
-  }
 }
