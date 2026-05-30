@@ -291,23 +291,48 @@ export default class AdminPage {
     }
   }
 
-  async action(type: string) {
-    if (type === 'calc-tournament' && !(await this.dialogService.confirm('Spiele & Ergebnisse löschen', 'Dies löscht ALLE Spiele und Ergebnisse. Wirklich fortfahren?', true))) return;
-    
+  /**
+   * Run a mutating request behind the loading flag, then report the outcome.
+   * The alert fires only after `loading` is reset, so a failed or dismissed
+   * dialog can never wedge the flag and disable every action button.
+   */
+  private async runAction(
+    request: () => Promise<unknown>,
+    logLabel: string,
+    successMsg: string,
+    errorMsg: string
+  ) {
     this.loading.set(true);
+    let ok = false;
     try {
-      let url = `/api/actions/${type}`;
-      if (type === 'random-draw') url = '/api/competitors/random-draw';
-      
-      await firstValueFrom(this.http.post(url, {}));
-      await this.dialogService.alert('Erfolg', 'Aktion erfolgreich ausgeführt.', 'success');
+      await request();
+      ok = true;
       this.competitorsResource.reload();
     } catch (err) {
-      console.error('Action failed', err);
-      await this.dialogService.alert('Fehler', 'Fehler bei der Aktion.', 'error');
+      console.error(logLabel, err);
     } finally {
       this.loading.set(false);
     }
+
+    await this.dialogService.alert(
+      ok ? 'Erfolg' : 'Fehler',
+      ok ? successMsg : errorMsg,
+      ok ? 'success' : 'error'
+    );
+  }
+
+  async action(type: string) {
+    if (type === 'calc-tournament' && !(await this.dialogService.confirm('Spiele & Ergebnisse löschen', 'Dies löscht ALLE Spiele und Ergebnisse. Wirklich fortfahren?', true))) return;
+
+    const url = type === 'random-draw' ? '/api/competitors/random-draw' : `/api/actions/${type}`;
+    await this.runAction(
+      () => firstValueFrom(this.http.post(url, {})),
+      'Action failed',
+      'Aktion erfolgreich ausgeführt.',
+      'Fehler bei der Aktion.'
+    );
+  }
+
   async postponeGames(minutesStr: string) {
     const minutes = parseInt(minutesStr, 10);
     if (isNaN(minutes) || minutes === 0) {
@@ -315,18 +340,13 @@ export default class AdminPage {
       return;
     }
 
-    if (!(await this.dialogService.confirm('Spiele verschieben', `Möchtest du alle ungespielten Spiele wirklich um ${minutes} Minuten verschieben?`, true))) return;
+    if (!(await this.dialogService.confirm('Spiele verschieben', `Möchtest du alle ungespielten Spiele wirklich um ${minutes} Minuten verschieben?`))) return;
 
-    this.loading.set(true);
-    try {
-      await firstValueFrom(this.http.post('/api/actions/postpone-games', { minutes }));
-      await this.dialogService.alert('Erfolg', `Die verbleibenden Spiele wurden erfolgreich um ${minutes} Minuten verschoben.`, 'success');
-      this.competitorsResource.reload();
-    } catch (err) {
-      console.error('Postpone failed', err);
-      await this.dialogService.alert('Fehler', 'Fehler beim Verschieben der Spiele.', 'error');
-    } finally {
-      this.loading.set(false);
-    }
+    await this.runAction(
+      () => firstValueFrom(this.http.post('/api/actions/postpone-games', { minutes })),
+      'Postpone failed',
+      `Die verbleibenden Spiele wurden um ${minutes} Minuten verschoben.`,
+      'Fehler beim Verschieben der Spiele.'
+    );
   }
 }

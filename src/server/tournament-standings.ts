@@ -1,10 +1,11 @@
-import { db } from './db';
+import { db, type DbOrTx } from './db';
 import { competitors, pairings, gamePoints } from './db/schema';
+import { toCalcCompetitor } from './db/calc-mappers';
 import { calcAllMatchPoints, type CalcCompetitor, type CalcGroup } from 'calc-tournament';
 
 export class TournamentStandings {
   static async getGroupsStandings(
-    tx: any = db,
+    tx: DbOrTx = db,
     competitorFilter: number = 0
   ): Promise<CalcGroup[]> {
     const [allComps, allPairings, allGps] = await Promise.all([
@@ -13,16 +14,12 @@ export class TournamentStandings {
       tx.select().from(gamePoints),
     ]);
 
-    const calcComps: CalcCompetitor[] = allComps.map((c: any) => ({
-      id: c.id,
-      name: c.name,
-      drawNumber: c.drawNumber ?? 0,
-      groupID: c.groupID ?? 0,
-      createdAt: c.createdAt,
-      diff: 0,
-    }));
+    const calcComps: CalcCompetitor[] = allComps.map(toCalcCompetitor);
 
-    calcAllMatchPoints(calcComps, allGps, allPairings);
+    // Group standings count only group-phase results; finals Pairings
+    // (groupID < 0) must not pollute the group ranking.
+    const groupPairings = allPairings.filter((p: any) => p.groupID > 0);
+    calcAllMatchPoints(calcComps, allGps, groupPairings);
 
     let filteredGroupId = 0;
     if (competitorFilter > 0) {

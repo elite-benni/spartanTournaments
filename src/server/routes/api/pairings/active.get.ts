@@ -1,7 +1,6 @@
 import { defineEventHandler } from 'h3';
-import { MatchRegistry } from '../../../match-registry';
+import { PairingReads } from '../../../pairing-reads';
 
 export default defineEventHandler(async () => {
-  return MatchRegistry.getActivePairings();
+  return PairingReads.findActivePairings();
 });
-

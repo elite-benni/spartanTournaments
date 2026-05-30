@@ -1,9 +1,11 @@
-import { Component, computed, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, inject, resource, PLATFORM_ID, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { injectLoad } from '@analogjs/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import type { load } from './gameplan.server';
 import { getPhaseName } from '../../shared/phase-name';
 
@@ -79,7 +81,30 @@ type PairingRow = Awaited<ReturnType<typeof load>>[number];
   `,
 })
 export default class GameplanPage {
-  private data = toSignal(injectLoad<typeof load>(), { initialValue: [] as PairingRow[] });
-  pairings = computed(() => this.data());
+  private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
+  private destroyRef = inject(DestroyRef);
+
+  private ssrData = toSignal(injectLoad<typeof load>(), { initialValue: [] as PairingRow[] });
+
+  // Only fetch in the browser: on the server the relative URL has no host, and
+  // the SSR render already has its data via injectLoad(). Returning undefined
+  // keeps value() empty so the computed falls back to ssrData() during SSR.
+  private liveResource = resource({
+    loader: () =>
+      isPlatformBrowser(this.platformId)
+        ? firstValueFrom(this.http.get<PairingRow[]>('/api/pairings'))
+        : Promise.resolve(undefined),
+  });
+
+  pairings = computed(() => this.liveResource.value() ?? this.ssrData());
+
   protected getPhaseName = getPhaseName;
+
+  constructor() {
+    if (isPlatformBrowser(this.platformId)) {
+      const intervalId = setInterval(() => this.liveResource.reload(), 30_000);
+      this.destroyRef.onDestroy(() => clearInterval(intervalId));
+    }
+  }
 }
