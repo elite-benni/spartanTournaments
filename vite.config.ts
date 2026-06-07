@@ -19,6 +19,9 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     analog({
+      prerender: {
+        routes: async () => [],
+      },
       nitro: {
         alias: {
           'calc-tournament': resolve(__dirname, 'libs/calc-tournament/src/index.ts'),
