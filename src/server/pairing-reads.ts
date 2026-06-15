@@ -30,13 +30,17 @@ export interface PairingWithCompetitors {
   // not-yet-filled finals slot), not merely its fields.
   competitor1: { id: number; name: string } | null;
   competitor2: { id: number; name: string } | null;
+  // The Pairing's result, or null when not yet played. One GamePoint per Pairing,
+  // so this never multiplies rows. Callers that don't show scores ignore it.
+  points: { competitor1Points: number; competitor2Points: number } | null;
 }
 
 export class PairingReads {
   /**
-   * The single Pairing-with-Competitors read. Owns the projection and the
-   * double self-join onto competitors; callers vary only the filter and
-   * always get the same enriched shape, ordered by startTime then court.
+   * The single Pairing-with-Competitors read. Owns the projection, the double
+   * self-join onto competitors, and the result join onto gamePoints; callers vary
+   * only the filter and always get the same enriched shape — each Pairing already
+   * carries its result in `points` — ordered by startTime then court.
    */
   static async findPairings(tx: DbOrTx = db, filter: PairingFilter = {}): Promise<PairingWithCompetitors[]> {
     const c1 = alias(competitors, 'c1');
@@ -58,7 +62,13 @@ export class PairingReads {
       conditions.push(gt(pairings.competitor1ID, 0), gt(pairings.competitor2ID, 0));
     }
 
-    let query = tx
+    // "Unplayed" = no GamePoint references this Pairing. The gamePoints join is
+    // always present (1:1, never multiplies rows); unplayedOnly just adds IS NULL.
+    if (filter.unplayedOnly) {
+      conditions.push(isNull(gamePoints.id));
+    }
+
+    return tx
       .select({
         id: pairings.id,
         gamenumber: pairings.gamenumber,
@@ -70,20 +80,17 @@ export class PairingReads {
         competitor2ID: pairings.competitor2ID,
         competitor1: { id: c1.id, name: c1.name },
         competitor2: { id: c2.id, name: c2.name },
+        points: {
+          competitor1Points: gamePoints.competitor1Points,
+          competitor2Points: gamePoints.competitor2Points,
+        },
       })
       .from(pairings)
       .leftJoin(c1, eq(pairings.competitor1ID, c1.id))
       .leftJoin(c2, eq(pairings.competitor2ID, c2.id))
-      .$dynamic();
-
-    // "Unplayed" = no GamePoint references this Pairing. The left join + IS NULL
-    // keeps only Pairings with zero results, without multiplying played rows.
-    if (filter.unplayedOnly) {
-      query = query.leftJoin(gamePoints, eq(pairings.id, gamePoints.pairingID));
-      conditions.push(isNull(gamePoints.id));
-    }
-
-    return query.where(conditions.length ? and(...conditions) : undefined).orderBy(pairings.startTime, pairings.court);
+      .leftJoin(gamePoints, eq(pairings.id, gamePoints.pairingID))
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(pairings.startTime, pairings.court);
   }
 
   /**

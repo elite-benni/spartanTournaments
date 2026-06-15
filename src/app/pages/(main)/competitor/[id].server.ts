@@ -6,17 +6,17 @@ import { TournamentStandings } from '../../../../server/tournament-standings';
 
 export const load = async ({ params }: PageServerLoad) => {
   const id = Number(params?.['id']);
-  if (!id) return { competitor: null, pairings: [], gamepoints: [], groups: [] };
+  if (!id) return { competitor: null, pairings: [], groups: [] };
 
   const competitor = (await db.select().from(competitors).where(eq(competitors.id, id)))[0];
   if (!competitor) {
-    return { competitor: null, pairings: [], gamepoints: [], groups: [] };
+    return { competitor: null, pairings: [], groups: [] };
   }
 
   const groupId = competitor.groupID ?? 0;
 
-  // Fetch GamePoints once and share them with the standings calc, so the page
-  // doesn't scan the table twice.
+  // GamePoints are fetched once to feed the standings calc (the Pairings read
+  // enriches its own rows with results separately).
   const allGps = await db.select().from(gamePoints);
   const [joinedPairings, groups] = await Promise.all([
     PairingReads.findPairings(db, { competitorId: id }),
@@ -26,7 +26,6 @@ export const load = async ({ params }: PageServerLoad) => {
   return {
     competitor,
     pairings: joinedPairings,
-    gamepoints: allGps,
     groups,
   };
 };

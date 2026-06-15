@@ -55,11 +55,12 @@ describe('PairingReads.findPairings', () => {
     expect(result).toEqual(rows);
   });
 
-  it('self-joins both competitors and orders by startTime then court', async () => {
+  it('self-joins both competitors plus gamePoints and orders by startTime then court', async () => {
     const { tx, calls } = makeTx();
     await PairingReads.findPairings(tx, {});
-    // Two leftJoins for competitor1 / competitor2.
-    expect(calls.leftJoin).toBe(2);
+    // Two leftJoins for competitor1 / competitor2, plus the always-on gamePoints
+    // join that carries each Pairing's result in `points`.
+    expect(calls.leftJoin).toBe(3);
     expect(calls.orderBy[0]).toHaveLength(2);
   });
 
@@ -75,9 +76,10 @@ describe('PairingReads.findPairings', () => {
     expect(calls.where[0]).toBeDefined();
   });
 
-  it('adds a third leftJoin (gamePoints) for unplayedOnly', async () => {
+  it('reuses the gamePoints join and adds an IS NULL filter for unplayedOnly', async () => {
     const { tx, calls } = makeTx();
     await PairingReads.findPairings(tx, { unplayedOnly: true });
+    // gamePoints is already joined for every read, so no extra join — only the filter.
     expect(calls.leftJoin).toBe(3);
     expect(calls.where[0]).toBeDefined();
   });

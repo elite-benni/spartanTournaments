@@ -207,20 +207,12 @@ export default class ResultsPage {
   protected isFinals = isFinals;
   data = toSignal(injectLoad<typeof load>());
 
-  pairings = computed(() => this.data()?.pairings ?? []);
-  gamepoints = computed(() => this.data()?.gamepoints ?? []);
   role = computed(() => this.data()?.role ?? null);
 
   canEdit = computed(() => this.role() === 'admin' || this.role() === 'referee');
 
-  results = computed(() => {
-    const pairings = this.pairings();
-    const gps = this.gamepoints();
-    return pairings.map((p) => ({
-      ...p,
-      points: gps.find((g) => g.pairingID === p.id),
-    }));
-  });
+  // Pairings already carry their result in `points` (PairingReads enriches the read).
+  results = computed(() => this.data()?.pairings ?? []);
 
   // First game that has no result entered yet — used as the scroll anchor on load.
   firstOpenId = computed(() => this.results().find((p) => !p.points)?.id ?? null);

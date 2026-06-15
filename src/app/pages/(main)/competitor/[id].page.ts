@@ -7,9 +7,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import type { load } from './[id].server';
 
 type LoadResult = Awaited<ReturnType<typeof load>>;
-type EnrichedPairing = LoadResult['pairings'][number] & {
-  points: LoadResult['gamepoints'][number] | undefined;
-};
+// Pairings arrive enriched with their result in `points` (PairingReads).
+type EnrichedPairing = LoadResult['pairings'][number];
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -201,19 +200,9 @@ type EnrichedPairing = LoadResult['pairings'][number] & {
 export default class CompetitorDetailPage {
   data = toSignal(injectLoad<typeof load>());
 
-  myPairings = computed(() => {
-    const d = this.data();
-    const c = d?.competitor;
-    if (!c) return [];
-    const gps = d.gamepoints ?? [];
-    const pairings = d.pairings ?? [];
-    return pairings
-      .filter((p) => p.competitor1?.id === c.id || p.competitor2?.id === c.id)
-      .map((p) => ({
-        ...p,
-        points: gps.find((g) => g.pairingID === p.id),
-      }));
-  });
+  // The server already filters to this Competitor's Pairings and enriches each with
+  // its result, so the page just reads them through.
+  myPairings = computed(() => this.data()?.pairings ?? []);
 
   getOpponent(p: EnrichedPairing) {
     const c = this.data()?.competitor;
