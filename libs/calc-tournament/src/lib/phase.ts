@@ -6,9 +6,7 @@
 
 export type FinalsStage = 'final' | 'semifinal' | 'quarterfinal' | 'octofinal' | 'ko';
 
-export type Phase =
-  | { kind: 'groups'; groupNumber: number }
-  | { kind: 'finals'; stage: FinalsStage; slot: number };
+export type Phase = { kind: 'groups'; groupNumber: number } | { kind: 'finals'; stage: FinalsStage; slot: number };
 
 export function isFinals(p: { groupID: number }): boolean {
   return p.groupID < 0;
