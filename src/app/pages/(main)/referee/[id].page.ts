@@ -115,6 +115,18 @@ export const routeMeta = defineRouteMeta({
 
             <!-- Footer Buttons -->
             <div class="flex justify-end gap-3 pt-6 border-t">
+              @if (gamepoint() && isAdmin()) {
+                <button
+                  type="button"
+                  hlmBtn
+                  variant="destructive"
+                  [disabled]="loading()"
+                  (click)="deleteResult()"
+                  class="w-36 mr-auto"
+                >
+                  Ergebnis löschen
+                </button>
+              }
               <a hlmBtn variant="ghost" [routerLink]="returnUrl" class="w-28">Abbrechen</a>
               <button hlmBtn [disabled]="resultForm.invalid || loading()" class="w-36 gap-2">
                 @if (loading()) {
@@ -151,6 +163,7 @@ export default class RefereeScoreEntryPage {
   data = toSignal(injectLoad<typeof load>());
   pairing = computed(() => this.data()?.pairing ?? null);
   gamepoint = computed(() => this.data()?.gamepoint ?? null);
+  isAdmin = computed(() => this.data()?.role === 'admin');
 
   loading = signal(false);
 
@@ -196,6 +209,23 @@ export default class RefereeScoreEntryPage {
       this.router.navigateByUrl(this.returnUrl);
     } catch (err) {
       console.error('Failed to save score', err);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async deleteResult() {
+    const p = this.pairing();
+    if (!p) return;
+
+    this.loading.set(true);
+    try {
+      await firstValueFrom(this.http.delete(`/api/gamepoints/${p.id}`));
+
+      // Navigate back to wherever we came from upon success
+      this.router.navigateByUrl(this.returnUrl);
+    } catch (err) {
+      console.error('Failed to delete score', err);
     } finally {
       this.loading.set(false);
     }

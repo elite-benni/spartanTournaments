@@ -275,6 +275,14 @@ interface Competitor {
                 </div>
                 <button hlmBtn variant="destructive" [disabled]="loading()" (click)="action('calc-finals')">Finalspiele berechnen</button>
               </div>
+
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg">
+                <div class="space-y-1">
+                  <h3 class="font-semibold">Nächste Finalrunde berechnen</h3>
+                  <p class="text-sm text-muted-foreground">Ermittelt die Sieger der aktuellen Finalrunde und erstellt die Paarungen der nächsten Runde. Kann erneut gedrückt werden, ohne Spiele zu duplizieren.</p>
+                </div>
+                <button hlmBtn variant="outline" [disabled]="loading()" (click)="action('calc-next-final-round')">Nächste Runde berechnen</button>
+              </div>
             </div>
           </section>
         </div>
@@ -381,10 +389,14 @@ export default class AdminPage {
     if (this.detailsForm.invalid) return;
     this.loading.set(true);
     try {
+      const { adminPassword, refereePassword, ...rest } = this.detailsForm.value;
       const payload = {
-        ...this.detailsForm.value,
+        ...rest,
         tournamentStartTime: this.toInstant(this.detailsForm.value.tournamentStartTime!),
         finalsStartTime: this.toInstant(this.detailsForm.value.finalsStartTime!),
+        // Server only applies a new password when these are non-empty.
+        newAdminPassword: adminPassword || undefined,
+        newRefereePassword: refereePassword || undefined,
       };
       await firstValueFrom(this.http.put('/api/tournament', payload));
       await this.dialogService.alert('Einstellungen', 'Einstellungen erfolgreich gespeichert.', 'success');

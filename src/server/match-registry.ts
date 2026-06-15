@@ -24,4 +24,9 @@ export class MatchRegistry {
       .returning();
     return updated;
   }
+
+  static async deleteGamePoint(tx: DbOrTx = db, pairingID: number) {
+    await tx.delete(gamePoints).where(eq(gamePoints.pairingID, pairingID));
+    return { ok: true };
+  }
 }

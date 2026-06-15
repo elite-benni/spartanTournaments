@@ -6,6 +6,7 @@ import { HlmButton } from '@spartan-ng/helm/button';
 import { injectLoad } from '@analogjs/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type { load } from './results.server';
+import { getPhaseName } from '../../shared/phase-name';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,9 +97,9 @@ import type { load } from './results.server';
                   p.points ? p.points.competitor2Points : '–'
                 }}</span>
               </div>
-              <span class="absolute bottom-1 right-2 font-mono text-[10px] text-muted-foreground/40"
-                >#{{ p.gamenumber > 0 ? p.gamenumber : '-' }}</span
-              >
+              <span class="absolute bottom-1 right-2 font-mono text-[10px] text-muted-foreground/40">{{
+                p.round < 0 ? getPhaseName(p.round) : '#' + (p.gamenumber > 0 ? p.gamenumber : '-')
+              }}</span>
             </div>
           </div>
         } @empty {
@@ -119,7 +120,9 @@ import type { load } from './results.server';
           <tbody hlmTBody>
             @for (p of results(); track p.id) {
               <tr hlmTr [id]="p.id === firstOpenId() ? 'first-open-d' : null">
-                <td hlmTd class="w-16 text-muted-foreground font-mono">{{ p.gamenumber > 0 ? p.gamenumber : '-' }}</td>
+                <td hlmTd class="w-16 text-muted-foreground" [class.font-mono]="p.round >= 0">{{
+                  p.round < 0 ? getPhaseName(p.round) : (p.gamenumber > 0 ? p.gamenumber : '-')
+                }}</td>
                 <td hlmTd>
                   <div class="flex items-center gap-4">
                     @if (p.competitor1 && p.competitor1.id && p.competitor1.id > 0) {
@@ -194,6 +197,7 @@ import type { load } from './results.server';
   `,
 })
 export default class ResultsPage {
+  protected getPhaseName = getPhaseName;
   data = toSignal(injectLoad<typeof load>());
 
   pairings = computed(() => this.data()?.pairings ?? []);

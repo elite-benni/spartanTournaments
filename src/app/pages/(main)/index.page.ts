@@ -6,7 +6,9 @@ import type { load } from './index.server';
 import { getPhaseName } from '../../shared/phase-name';
 import { injectLivePairings } from '../../shared/live-pairings';
 
-type ActivePairing = Awaited<ReturnType<typeof load>>[number];
+type LoadData = Awaited<ReturnType<typeof load>>;
+type ActivePairing = LoadData['active'][number];
+type GamePoint = LoadData['gamepoints'][number];
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,50 +59,93 @@ type ActivePairing = Awaited<ReturnType<typeof load>>[number];
     </div>
 
     <ng-template #card let-pairing="pairing" let-live="live">
-      <div
-        class="border rounded-lg p-6 shadow-sm"
-        [class.bg-card]="!live"
-        [class.bg-green-50]="live"
-        [class.border-green-500]="live"
-        [class.ring-1]="live"
-        [class.ring-green-500]="live"
-      >
-        <div class="flex justify-between items-start mb-4">
-          <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Court {{ pairing.court }}</span>
-          <span class="text-xs font-medium px-2 py-1 rounded bg-secondary text-secondary-foreground">
-            {{ pairing.groupID > 0 ? 'Gruppe ' + pairing.groupID : getPhaseName(pairing.round) }}
+      <div class="border rounded-xl shadow-sm overflow-hidden bg-card">
+        <!-- Header band: court + group, time -->
+        <div class="flex items-center justify-between gap-2 border-b bg-muted/30 px-4 py-2.5">
+          <span class="flex items-center gap-2 min-w-0">
+            <span class="text-sm font-bold text-primary leading-none truncate">Court {{ pairing.court }}</span>
+            <span class="px-2 py-0.5 rounded font-bold text-xs shrink-0 bg-secondary text-secondary-foreground">
+              {{ pairing.groupID > 0 ? 'Gruppe ' + pairing.groupID : getPhaseName(pairing.round) }}
+            </span>
+          </span>
+          <span class="flex items-center gap-1.5 shrink-0 text-muted-foreground">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-sm font-bold tabular-nums leading-none">{{ pairing.startTime | date: 'HH:mm' }}</span>
           </span>
         </div>
 
-        <div class="flex flex-col items-center gap-2">
-          <div
-            class="w-full text-center font-bold text-lg leading-tight break-words"
-            [class.text-muted-foreground]="!pairing.competitor1?.id"
-            [class.italic]="!pairing.competitor1?.id"
+        <!-- Matchup (with result, if one has been entered) -->
+        @let points = pointsFor(pairing.id);
+        <div class="relative px-4 py-4 space-y-1">
+          @if (points) {
+            <div class="flex items-baseline justify-between gap-3">
+              <span
+                class="min-w-0 break-words font-semibold"
+                [class.font-bold]="points.competitor1Points > points.competitor2Points"
+                [class.text-muted-foreground]="!pairing.competitor1?.id"
+                [class.italic]="!pairing.competitor1?.id"
+                >{{ pairing.competitor1?.name ?? 'Offen' }}</span
+              >
+              <span class="font-black text-xl tabular-nums shrink-0">{{ points.competitor1Points }}</span>
+            </div>
+            <div class="flex items-baseline justify-between gap-3">
+              <span
+                class="min-w-0 break-words font-semibold"
+                [class.font-bold]="points.competitor2Points > points.competitor1Points"
+                [class.text-muted-foreground]="!pairing.competitor2?.id"
+                [class.italic]="!pairing.competitor2?.id"
+                >{{ pairing.competitor2?.name ?? 'Offen' }}</span
+              >
+              <span class="font-black text-xl tabular-nums shrink-0">{{ points.competitor2Points }}</span>
+            </div>
+          } @else {
+            <div class="text-center space-y-1">
+              <div
+                class="font-semibold break-words"
+                [class.text-muted-foreground]="!pairing.competitor1?.id"
+                [class.italic]="!pairing.competitor1?.id"
+              >
+                {{ pairing.competitor1?.name ?? 'Offen' }}
+              </div>
+              <div class="text-muted-foreground/50 text-xs font-black italic">VS</div>
+              <div
+                class="font-semibold break-words"
+                [class.text-muted-foreground]="!pairing.competitor2?.id"
+                [class.italic]="!pairing.competitor2?.id"
+              >
+                {{ pairing.competitor2?.name ?? 'Offen' }}
+              </div>
+            </div>
+          }
+          <span class="absolute bottom-1.5 right-2 font-mono text-[10px] text-muted-foreground/40"
+            >#{{ pairing.gamenumber > 0 ? pairing.gamenumber : '-' }}</span
           >
-            {{ pairing.competitor1?.name ?? 'Offen' }}
-          </div>
-          <div class="text-sm font-black uppercase tracking-widest text-muted-foreground/40 italic">vs</div>
-          <div
-            class="w-full text-center font-bold text-lg leading-tight break-words"
-            [class.text-muted-foreground]="!pairing.competitor2?.id"
-            [class.italic]="!pairing.competitor2?.id"
-          >
-            {{ pairing.competitor2?.name ?? 'Offen' }}
-          </div>
-        </div>
-
-        <div class="mt-6 text-center text-sm" [class.text-green-700]="live" [class.text-muted-foreground]="!live">
-          {{ live ? 'Läuft seit' : 'Beginn' }}: {{ pairing.startTime | date: 'HH:mm' }} Uhr
         </div>
       </div>
     </ng-template>
   `,
 })
 export default class HomeComponent {
-  private ssrData = toSignal(injectLoad<typeof load>(), { initialValue: [] as ActivePairing[] });
+  private ssrData = toSignal(injectLoad<typeof load>());
 
-  activePairings = injectLivePairings<ActivePairing[]>('/api/pairings/active', this.ssrData);
+  private activeSsr = computed(() => this.ssrData()?.active ?? []);
+  private gamepointsSsr = computed(() => this.ssrData()?.gamepoints ?? []);
+
+  activePairings = injectLivePairings<ActivePairing[]>('/api/pairings/active', this.activeSsr);
+  private gamepoints = injectLivePairings<GamePoint[]>('/api/gamepoints', this.gamepointsSsr);
+
+  // Result for a pairing, if one has been entered yet (undefined otherwise).
+  protected pointsFor(pairingId: number): GamePoint | undefined {
+    return this.gamepoints().find((g) => g.pairingID === pairingId);
+  }
 
   // A game is "running" once its start time has passed; everything still in the
   // future within the active window is "upcoming".
