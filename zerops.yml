@@ -1,0 +1,25 @@
+zerops:
+  - setup: ssr
+    build:
+      base: nodejs@22
+      envVariables:
+        NODE_OPTIONS: --max-old-space-size=8192
+      buildCommands:
+        - pnpm i
+        - pnpm run build
+      deployFiles:
+        - node_modules
+        - dist
+        - drizzle
+        - drizzle.config.ts
+        - package.json
+    run:
+      base: nodejs@22
+      envVariables:
+        DATABASE_URL: ${db_connectionString}/${db_dbName}
+      ports:
+        - port: 3000
+          httpSupport: true
+      initCommands:
+        - ./node_modules/.bin/drizzle-kit migrate
+      start: node dist/analog/server/index.mjs

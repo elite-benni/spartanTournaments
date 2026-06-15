@@ -1,7 +1,8 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
@@ -15,7 +16,7 @@ import { firstValueFrom } from 'rxjs';
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
           <div class="flex items-center gap-8">
-            <a routerLink="/" class="text-xl font-bold tracking-tight shrink-0">spartanTournaments</a>
+            <a routerLink="/" class="text-xl font-bold tracking-tight shrink-0">{{ tournamentName() }}</a>
 
             <!-- Desktop nav -->
             <div class="hidden md:flex items-center gap-4">
@@ -78,10 +79,20 @@ import { firstValueFrom } from 'rxjs';
 })
 export class NavbarComponent {
   private http = inject(HttpClient);
+  private title = inject(Title);
 
   private _session = toSignal(this.http.get<{ role: 'admin' | 'referee' | null }>('/api/auth/session'));
   role = computed(() => this._session()?.role ?? null);
   mobileOpen = signal(false);
+
+  private _tournament = toSignal(
+    this.http.get<{ tournament: { name: string } | null }>('/api/tournament'),
+  );
+  tournamentName = computed(() => this._tournament()?.tournament?.name ?? 'spartanTournaments');
+
+  constructor() {
+    effect(() => this.title.setTitle(this.tournamentName()));
+  }
 
   async logout() {
     try {

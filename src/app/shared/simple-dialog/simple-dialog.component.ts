@@ -41,9 +41,8 @@ import { SimpleDialogButton, SimpleDialogService } from './simple-dialog.service
             @if (description()) {
               <p
                 class="px-1 whitespace-pre-wrap text-sm text-muted-foreground"
-                hlmAlertDialogDescription>
-                {{ description() }}
-              </p>
+                hlmAlertDialogDescription
+              >{{ description() }}</p>
             }
           </hlm-alert-dialog-header>
         }

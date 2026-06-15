@@ -129,6 +129,28 @@ export const routeMeta = defineRouteMeta({
                 <button hlmBtn [disabled]="loading()">Hinzufügen</button>
               </form>
 
+              <div class="border-t pt-4 space-y-2">
+                <button type="button" class="text-sm font-medium text-muted-foreground hover:text-foreground" (click)="bulkOpen.set(!bulkOpen())">
+                  {{ bulkOpen() ? '▾' : '▸' }} Mehrere Teilnehmer importieren
+                </button>
+                @if (bulkOpen()) {
+                  <div class="space-y-2">
+                    <p class="text-sm text-muted-foreground">Ein Name pro Zeile. Leere Zeilen werden ignoriert.</p>
+                    <textarea
+                      #bulkNames
+                      rows="6"
+                      class="flex min-h-[9rem] w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      placeholder="Max Mustermann&#10;Team Rot&#10;Erika Beispiel"
+                    ></textarea>
+                    <div class="flex justify-end">
+                      <button hlmBtn [disabled]="loading()" (click)="bulkAddCompetitors(bulkNames.value)">
+                        {{ loading() ? 'Wird importiert...' : 'Importieren' }}
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+
               @if (competitors().length === 0) {
                 <div class="text-center py-8 text-muted-foreground">
                   Keine Teilnehmer registriert.
@@ -365,8 +387,40 @@ export default class AdminPage {
     try {
       await firstValueFrom(this.http.post<any>('/api/competitors', { name }));
       this.competitorsResource.reload();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Add failed', err);
+      await this.dialogService.alert('Fehler', err?.error?.statusMessage ?? err?.error?.message ?? 'Teilnehmer konnte nicht hinzugefügt werden.', 'error');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  bulkOpen = signal(false);
+
+  async bulkAddCompetitors(raw: string) {
+    const names = raw
+      .split('\n')
+      .map((n) => n.trim())
+      .filter((n) => n.length > 0);
+    if (names.length === 0) {
+      await this.dialogService.alert('Fehler', 'Bitte gib mindestens einen Namen ein.', 'error');
+      return;
+    }
+    this.loading.set(true);
+    try {
+      const { created, skipped } = await firstValueFrom(
+        this.http.post<{ created: any[]; skipped: string[] }>('/api/competitors', { names }),
+      );
+      this.competitorsResource.reload();
+      this.bulkOpen.set(false);
+      let msg = `${created.length} Teilnehmer importiert.`;
+      if (skipped.length) {
+        msg += `\n\n${skipped.length} übersprungen (Duplikate):\n${skipped.join('\n')}`;
+      }
+      await this.dialogService.alert('Import', msg, created.length ? 'success' : 'error');
+    } catch (err) {
+      console.error('Bulk add failed', err);
+      await this.dialogService.alert('Fehler', 'Import fehlgeschlagen.', 'error');
     } finally {
       this.loading.set(false);
     }
