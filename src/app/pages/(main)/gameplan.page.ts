@@ -93,20 +93,20 @@ type PairingRow = Awaited<ReturnType<typeof load>>[number];
 
       <!-- Desktop: Tabelle -->
       <div hlmTableContainer class="hidden md:block border rounded-lg overflow-hidden shadow-sm">
-        <table hlmTable>
+        <table hlmTable class="w-full table-fixed">
           <thead hlmTHead>
             <tr hlmTr>
-              <th hlmTh class="w-16">Nr.</th>
+              <th hlmTh class="w-12">Nr.</th>
               <th hlmTh class="w-32 text-center text-primary">Runde</th>
-              <th hlmTh class="w-32">Zeit</th>
-              <th hlmTh class="w-24 text-center">Court</th>
-              <th hlmTh>Begegnung</th>
+              <th hlmTh class="w-24">Zeit</th>
+              <th hlmTh class="w-16 text-center">Court</th>
+              <th hlmTh class="text-center">Begegnung</th>
             </tr>
           </thead>
           <tbody hlmTBody>
             @for (p of pairings(); track p.id) {
               <tr hlmTr [class]="isFinals(p) ? 'bg-primary/5' : ''">
-                <td hlmTd class="w-16 text-muted-foreground font-mono">{{ p.gamenumber > 0 ? p.gamenumber : '-' }}</td>
+                <td hlmTd class="w-12 text-muted-foreground font-mono">{{ p.gamenumber > 0 ? p.gamenumber : '-' }}</td>
                 <td hlmTd class="w-32 text-center">
                   <span
                     class="px-2 py-1 rounded text-xs font-bold"
@@ -117,30 +117,32 @@ type PairingRow = Awaited<ReturnType<typeof load>>[number];
                     {{ phaseLabel(p) }}
                   </span>
                 </td>
-                <td hlmTd class="w-32 font-medium">{{ p.startTime | date: 'HH:mm' }} Uhr</td>
-                <td hlmTd class="w-24 text-center">{{ p.court }}</td>
+                <td hlmTd class="w-24 font-medium">{{ p.startTime | date: 'HH:mm' }} Uhr</td>
+                <td hlmTd class="w-16 text-center">{{ p.court }}</td>
                 <td hlmTd>
-                  <div class="flex items-center gap-4 text-lg">
+                  <div class="flex items-center gap-3">
                     @if (p.competitor1 && p.competitor1.id && p.competitor1.id > 0) {
                       <a
                         [routerLink]="['/competitor', p.competitor1.id]"
-                        class="flex-1 min-w-0 text-right font-semibold break-words hover:underline hover:text-primary transition-colors"
+                        [title]="p.competitor1.name"
+                        class="flex-1 min-w-0 text-right font-semibold truncate hover:underline hover:text-primary transition-colors"
                       >
                         {{ p.competitor1.name }}
                       </a>
                     } @else {
-                      <span class="flex-1 text-right font-semibold text-muted-foreground italic">Offen</span>
+                      <span class="flex-1 min-w-0 text-right font-semibold text-muted-foreground italic">Offen</span>
                     }
-                    <span class="text-muted-foreground/50 text-xs font-black italic">VS</span>
+                    <span class="shrink-0 text-muted-foreground/50 text-xs font-black italic">VS</span>
                     @if (p.competitor2 && p.competitor2.id && p.competitor2.id > 0) {
                       <a
                         [routerLink]="['/competitor', p.competitor2.id]"
-                        class="flex-1 min-w-0 font-semibold break-words hover:underline hover:text-primary transition-colors"
+                        [title]="p.competitor2.name"
+                        class="flex-1 min-w-0 font-semibold truncate hover:underline hover:text-primary transition-colors"
                       >
                         {{ p.competitor2.name }}
                       </a>
                     } @else {
-                      <span class="flex-1 font-semibold text-muted-foreground italic">Offen</span>
+                      <span class="flex-1 min-w-0 font-semibold text-muted-foreground italic">Offen</span>
                     }
                   </div>
                 </td>

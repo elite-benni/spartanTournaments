@@ -91,13 +91,13 @@ export const routeMeta = defineRouteMeta({
 
       <!-- Desktop: Tabelle -->
       <div hlmTableContainer class="hidden md:block border rounded-lg overflow-hidden shadow-sm bg-card">
-        <table hlmTable>
+        <table hlmTable class="w-full table-fixed">
           <thead hlmTHead>
             <tr hlmTr>
               <th hlmTh class="w-16">Nr.</th>
               <th hlmTh class="w-36">Startzeit</th>
               <th hlmTh class="w-24">Court</th>
-              <th hlmTh>Begegnung</th>
+              <th hlmTh class="text-center">Begegnung</th>
             </tr>
           </thead>
           <tbody hlmTBody>
@@ -131,9 +131,13 @@ export const routeMeta = defineRouteMeta({
                 </td>
                 <td hlmTd>
                   <div class="flex items-center gap-3">
-                    <span class="font-medium break-words">{{ p.competitor1?.name }}</span>
-                    <span class="text-muted-foreground/50 text-xs italic font-bold">VS</span>
-                    <span class="font-medium break-words">{{ p.competitor2?.name }}</span>
+                    <span class="flex-1 min-w-0 text-right font-medium truncate" [title]="p.competitor1?.name">{{
+                      p.competitor1?.name
+                    }}</span>
+                    <span class="shrink-0 text-muted-foreground/50 text-xs italic font-bold">VS</span>
+                    <span class="flex-1 min-w-0 font-medium truncate" [title]="p.competitor2?.name">{{
+                      p.competitor2?.name
+                    }}</span>
                   </div>
                 </td>
               </tr>

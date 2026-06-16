@@ -119,7 +119,7 @@ import { isFinals } from 'calc-tournament';
           <thead hlmTHead>
             <tr hlmTr>
               <th hlmTh class="w-16">Nr.</th>
-              <th hlmTh>Begegnung</th>
+              <th hlmTh class="text-center">Begegnung</th>
               <th hlmTh class="w-28 text-center border-l">Ergebnis</th>
             </tr>
           </thead>
