@@ -81,6 +81,10 @@ export const routeMeta = defineRouteMeta({
                   hlmInput
                   id="competitor1Points"
                   type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  (keydown)="blockNegative($event)"
                   (focus)="selectText($event)"
                   formControlName="competitor1Points"
                   class="text-center text-4xl font-extrabold h-24 w-full shadow-inner border-2 focus:border-primary transition-all rounded-xl"
@@ -107,6 +111,10 @@ export const routeMeta = defineRouteMeta({
                   hlmInput
                   id="competitor2Points"
                   type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  (keydown)="blockNegative($event)"
                   (focus)="selectText($event)"
                   formControlName="competitor2Points"
                   class="text-center text-4xl font-extrabold h-24 w-full shadow-inner border-2 focus:border-primary transition-all rounded-xl"
@@ -174,6 +182,13 @@ export default class RefereeScoreEntryPage {
     competitor1Points: [0, [Validators.required, Validators.min(0)]],
     competitor2Points: [0, [Validators.required, Validators.min(0)]],
   });
+
+  /** Prevent typing a minus sign (or exponent) so points can never go negative. */
+  blockNegative(event: KeyboardEvent) {
+    if (event.key === '-' || event.key === '+' || event.key === 'e' || event.key === 'E') {
+      event.preventDefault();
+    }
+  }
 
   selectText(event: FocusEvent) {
     const input = event.target as HTMLInputElement;

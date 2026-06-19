@@ -5,6 +5,7 @@ import { HlmTabsImports } from '@spartan-ng/helm/tabs';
 import { injectLoad } from '@analogjs/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type { load } from './[id].server';
+import { fireConfetti } from '../../../shared/confetti';
 
 type LoadResult = Awaited<ReturnType<typeof load>>;
 // Pairings arrive enriched with their result in `points` (PairingReads).
@@ -30,7 +31,7 @@ type EnrichedPairing = LoadResult['pairings'][number];
         <div hlmTabs tab="schedule" class="w-full">
           <hlm-tabs-list class="grid w-full grid-cols-2 shadow-sm">
             <button hlmTabsTrigger="schedule">Eigene Spiele</button>
-            <button hlmTabsTrigger="group">Gruppe & Ranking</button>
+            <button hlmTabsTrigger="group" (click)="celebrateIfFirst()">Gruppe & Ranking</button>
           </hlm-tabs-list>
 
           <!-- Schedule & Results -->
@@ -206,6 +207,17 @@ export default class CompetitorDetailPage {
   // The server already filters to this Competitor's Pairings and enriches each with
   // its result, so the page just reads them through.
   myPairings = computed(() => this.data()?.pairings ?? []);
+
+  // The "chosen team" is the competitor in the URL — celebrate when they top their group.
+  private isFirstInGroup = computed(() => {
+    const id = this.data()?.competitor?.id;
+    if (id == null) return false;
+    return (this.data()?.groups ?? []).some((g) => g.competitors[0]?.id === id);
+  });
+
+  celebrateIfFirst() {
+    if (this.isFirstInGroup()) fireConfetti();
+  }
 
   getOpponent(p: EnrichedPairing) {
     const c = this.data()?.competitor;

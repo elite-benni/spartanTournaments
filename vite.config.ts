@@ -23,6 +23,9 @@ export default defineConfig(() => ({
         routes: async () => [],
       },
       nitro: {
+        // Keep test files out of the server route scan — otherwise their
+        // top-level vi.mock() calls get bundled and crash the dev server.
+        ignore: ['**/*.spec.ts'],
         alias: {
           'calc-tournament': resolve(__dirname, 'libs/calc-tournament/src/index.ts'),
         },
