@@ -1,6 +1,7 @@
 import { CalcGamePoint, CalcGroup, CalcPairing } from '../models/models';
 import { calcAllMatchPoints } from './calc-all-match-points';
 import { calcFinalistPositions } from './calc-finals-ranking-positions';
+import { avoidSameGroupFirstRound } from './avoid-same-group-first-round';
 
 export function calcFinals(
   groups: CalcGroup[],
@@ -19,6 +20,8 @@ export function calcFinals(
     sortedFinalists[i].finalPosition = finalPositions[i];
   }
   sortedFinalists.sort((a, b) => (a.finalPosition ?? 0) - (b.finalPosition ?? 0));
+  // Best-effort: avoid first-round matchups between teams from the same group.
+  avoidSameGroupFirstRound(sortedFinalists);
 
   const result: CalcPairing[] = [];
   let court = 1;

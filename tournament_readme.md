@@ -176,7 +176,13 @@ points, game points, diff, and head-to-head as further tiebreakers.
 2. Assigns each a **bracket position** via `calcFinalistPositions(finalistCount)`
    (`calc-finals-ranking-positions.ts`), which produces the standard seeding
    order (1 vs lowest, etc., recursively) so that top seeds only meet late.
-3. Pairs them up `(0,1), (2,3), …` into the first finals stage, encoding the
+3. Applies `avoidSameGroupFirstRound()` (feature #3): a best-effort reorder of the
+   seeded finalists so that no first-round pair contains two teams from the *same
+   group*. For each clashing pair it swaps the *lower* seed with the nearest
+   finalist whose move resolves the clash without creating a new one — keeping the
+   seeding disturbance minimal. If a clash is unavoidable (e.g. more than half the
+   finalists come from one group) it is left as is.
+4. Pairs them up `(0,1), (2,3), …` into the first finals stage, encoding the
    stage in `round` (`-finalistCount/2`) and the bracket slot in `groupID`
    (negative). Courts and start times are assigned sequentially from
    `finalsStartTime`.
@@ -184,10 +190,9 @@ points, game points, diff, and head-to-head as further tiebreakers.
 `finalistCount` must be a power of two (4 → semis, 8 → quarters, 16 → octofinals,
 32 → round of 32, …).
 
-> **Known limitation (feature #3, in progress):** seeding is purely by global
-> rank, so the first finals round can pair two teams that came from the *same
-> group*. Avoiding same-group opponents in the first finals round is a planned
-> change.
+> Note: same-group avoidance only applies to the **first** finals round, where the
+> groups are known. Later rounds are determined by who wins, so a same-group
+> matchup can still occur once the bracket advances.
 
 ## 7. Advancing the bracket
 
@@ -236,6 +241,7 @@ The server wires this up in `TournamentEngine`:
 | Group ranking + tiebreaks | `libs/calc-tournament/src/lib/sort-group-h2h.ts` |
 | Global ranking | `libs/calc-tournament/src/lib/sort-competitors-ranking.ts` |
 | Finals seeding positions | `libs/calc-tournament/src/lib/calc-finals-ranking-positions.ts` |
+| Same-group first-round avoidance | `libs/calc-tournament/src/lib/avoid-same-group-first-round.ts` |
 | Initial finals bracket | `libs/calc-tournament/src/lib/calc-finals.ts` |
 | Bracket advancement | `libs/calc-tournament/src/lib/calc-next-final-round.ts` |
 | Server orchestration + persistence | `src/server/tournament-engine.ts` |
