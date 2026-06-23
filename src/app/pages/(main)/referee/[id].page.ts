@@ -166,8 +166,9 @@ export default class RefereeScoreEntryPage {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  // Where to return after saving/cancelling — '/results' if we came from there, else '/referee'.
-  protected returnUrl = this.route.snapshot.queryParamMap.get('from') === 'results' ? '/results' : '/referee';
+  // Where to return after saving/cancelling, based on where we came from.
+  // Defaults to the Spielplan, which is now the referee's entry point.
+  protected returnUrl = this.route.snapshot.queryParamMap.get('from') === 'results' ? '/results' : '/gameplan';
 
   protected isGroups = isGroups;
 

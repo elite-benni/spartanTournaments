@@ -46,14 +46,6 @@ import { ThemeService } from '../shared/theme.service';
                 class="text-sm font-medium transition-colors hover:text-primary"
                 >Ergebnisse</a
               >
-              @if (role() === 'admin' || role() === 'referee') {
-                <a
-                  routerLink="/referee"
-                  routerLinkActive="text-primary"
-                  class="text-sm font-medium transition-colors hover:text-primary"
-                  >Schiedsrichter</a
-                >
-              }
             </div>
           </div>
 
@@ -167,14 +159,6 @@ import { ThemeService } from '../shared/theme.service';
               class="block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
               >Ergebnisse</a
             >
-            @if (role() === 'admin' || role() === 'referee') {
-              <a
-                routerLink="/referee"
-                routerLinkActive="bg-accent"
-                class="block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-                >Schiedsrichter</a
-              >
-            }
             @if (role() === 'admin') {
               <a
                 routerLink="/admin"

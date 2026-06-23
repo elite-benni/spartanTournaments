@@ -1,4 +1,4 @@
-import { Component, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { HlmTabsImports } from '@spartan-ng/helm/tabs';
@@ -6,6 +6,7 @@ import { injectLoad } from '@analogjs/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import type { load } from './[id].server';
 import { fireConfetti } from '../../../shared/confetti';
+import { MyTeamService } from '../../../shared/my-team.service';
 
 type LoadResult = Awaited<ReturnType<typeof load>>;
 // Pairings arrive enriched with their result in `points` (PairingReads).
@@ -22,7 +23,34 @@ type EnrichedPairing = LoadResult['pairings'][number];
           <div class="flex items-center gap-4 text-muted-foreground mb-2">
             <span class="text-sm font-medium uppercase tracking-widest text-primary">Teilnehmer Profil</span>
           </div>
-          <h1 class="text-4xl font-bold tracking-tight">{{ c.name }}</h1>
+          <div class="flex items-start gap-3">
+            <h1 class="text-4xl font-bold tracking-tight">{{ c.name }}</h1>
+            <button
+              type="button"
+              (click)="toggleMyTeam(c.id, c.name)"
+              class="shrink-0 mt-1 p-1.5 rounded-full hover:bg-accent transition-colors"
+              [class.text-primary]="isMyTeam(c.id)"
+              [class.text-muted-foreground]="!isMyTeam(c.id)"
+              [attr.aria-pressed]="isMyTeam(c.id)"
+              [attr.aria-label]="isMyTeam(c.id) ? 'Als mein Team entfernen' : 'Als mein Team merken'"
+              [title]="isMyTeam(c.id) ? 'Mein Team — zum Entfernen tippen' : 'Als mein Team merken'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-7 w-7"
+                viewBox="0 0 24 24"
+                [attr.fill]="isMyTeam(c.id) ? 'currentColor' : 'none'"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M11.48 3.5a.56.56 0 011.04 0l2.12 4.92 5.34.46c.49.04.69.66.31.99l-4.05 3.51 1.21 5.22c.11.48-.41.86-.83.6L12 16.9l-4.62 2.8c-.42.26-.94-.12-.83-.6l1.21-5.22-4.05-3.51c-.38-.33-.18-.95.31-.99l5.34-.46L11.48 3.5z"
+                />
+              </svg>
+            </button>
+          </div>
           <p class="text-muted-foreground mt-2">
             Gruppe {{ c.groupID ?? 'N/A' }} | Losnummer: {{ c.drawNumber ?? 'N/A' }}
           </p>
@@ -202,7 +230,18 @@ type EnrichedPairing = LoadResult['pairings'][number];
   `,
 })
 export default class CompetitorDetailPage {
+  private myTeam = inject(MyTeamService);
+
   data = toSignal(injectLoad<typeof load>());
+
+  protected isMyTeam(id: number) {
+    return this.myTeam.isMyTeam(id);
+  }
+
+  protected toggleMyTeam(id: number, name: string) {
+    this.myTeam.toggle({ id, name });
+  }
+
 
   // The server already filters to this Competitor's Pairings and enriches each with
   // its result, so the page just reads them through.
