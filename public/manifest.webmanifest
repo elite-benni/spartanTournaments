@@ -1,11 +1,11 @@
 {
-  "name": "4KIDS Boccia",
-  "short_name": "Boccia",
+  "name": "SpartanTournaments",
+  "short_name": "Spartan",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#a31621",
+  "theme_color": "#18181b",
   "icons": [
     {
       "src": "/icon-192.png",

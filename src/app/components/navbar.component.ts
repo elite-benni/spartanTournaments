@@ -17,7 +17,9 @@ import { ThemeService } from '../shared/theme.service';
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
           <div class="flex items-center gap-8">
-            <a routerLink="/" class="text-xl font-bold tracking-tight shrink-0">{{ tournamentName() }}</a>
+            <a routerLink="/" class="text-xl font-bold tracking-tight shrink-0 flex items-center gap-2">
+              <span aria-hidden="true">🏆</span>{{ tournamentName() }}
+            </a>
 
             <!-- Desktop nav -->
             <div class="hidden md:flex items-center gap-4">

@@ -1,5 +1,8 @@
 # SpartanTournaments
 
+[![Built with Spartan UI](https://img.shields.io/badge/Built%20with-Spartan%20UI-000?logo=angular)](https://spartan.ng)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+
 A self-hosted web app for running a single round-based competition from start to
 finish: configure the tournament, manage competitors, draw groups, play a
 round-robin groups phase, then progress through a knockout finals bracket — with
