@@ -116,8 +116,6 @@ environment.
 
 ### Deploy on Zerops
 
-[![Deploy on Zerops](https://github.com/zeropsio/recipe-shared-assets/blob/main/deploy-button/green/deploy-button.svg)](https://app.zerops.io/recipe/spartantournaments)
-
 This repo ships a [Zerops](https://zerops.io) recipe:
 
 - `zerops-project-import.yml` provisions the project — the SSR app plus a
@@ -125,8 +123,12 @@ This repo ships a [Zerops](https://zerops.io) recipe:
 - `zerops.yml` defines the build/run pipeline and wires `DATABASE_URL` from the
   `db` service.
 
-To deploy manually, paste `zerops-project-import.yml` into the **Import project**
-dialog in the Zerops app, then connect the `ssr` service to this repository.
+To deploy, open the [Zerops app](https://app.zerops.io), choose **Import project**,
+and paste the contents of [`zerops-project-import.yml`](./zerops-project-import.yml).
+Zerops builds the `ssr` service from this repository and starts PostgreSQL
+automatically.
+
+> One-click deploy button coming once the recipe is listed in the Zerops gallery.
 
 ## License
 
