@@ -115,12 +115,16 @@ export class SimpleDialogService {
 
   // Helper helper to make standard alert simple
   alert(title: string, description: string, type: SimpleDialog['type'] = 'message'): Promise<string> {
+    // Primary is the same red as destructive in this theme, so a default OK on a
+    // success/info alert reads as a destructive button. Use outline there.
+    const okButton: SimpleDialogButton =
+      type === 'success' || type === 'info' ? { ...dlgBtnOk, variant: 'outline' } : dlgBtnOk;
     return new Promise((resolve) => {
       this.create({
         title,
         description,
         type,
-        mainButton: dlgBtnOk,
+        mainButton: okButton,
         action: (res) => resolve(res),
       });
     });

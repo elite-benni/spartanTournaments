@@ -117,16 +117,16 @@ export class SimpleDialogComponent {
     } else {
       switch (this.type()) {
         case 'success':
-          computedClass += ' border-green-200 bg-green-50 text-green-900';
+          computedClass += ' border-green-500/40 text-green-700 dark:text-green-400';
           break;
         case 'info':
-          computedClass += ' border-blue-200 bg-blue-50 text-blue-900';
+          computedClass += ' border-blue-500/40 text-blue-700 dark:text-blue-400';
           break;
         case 'warning':
-          computedClass += ' border-yellow-200 bg-yellow-50 text-yellow-900';
+          computedClass += ' border-amber-500/40 text-amber-700 dark:text-amber-400';
           break;
         case 'error':
-          computedClass += ' border-red-200 bg-red-50 text-red-900';
+          computedClass += ' border-red-500/40 text-red-700 dark:text-red-400';
           break;
       }
     }
