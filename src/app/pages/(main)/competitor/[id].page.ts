@@ -7,6 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import type { load } from './[id].server';
 import { fireConfetti } from '../../../shared/confetti';
 import { MyTeamService } from '../../../shared/my-team.service';
+import { GroupStandingsComponent } from '../../../components/group-standings.component';
 
 type LoadResult = Awaited<ReturnType<typeof load>>;
 // Pairings arrive enriched with their result in `points` (PairingReads).
@@ -15,7 +16,7 @@ type EnrichedPairing = LoadResult['pairings'][number];
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-competitor-detail',
-  imports: [CommonModule, ...HlmTableImports, ...HlmTabsImports],
+  imports: [CommonModule, ...HlmTableImports, ...HlmTabsImports, GroupStandingsComponent],
   template: `
     <div class="space-y-8">
       @if (data()?.competitor; as c) {
@@ -156,62 +157,7 @@ type EnrichedPairing = LoadResult['pairings'][number];
             @for (group of data()?.groups; track group.id) {
               <div class="space-y-4">
                 <h3 class="text-xl font-bold">Gruppe {{ group.id }} Ranking</h3>
-
-                <!-- Mobile: Karten-Liste -->
-                <div class="md:hidden border rounded-lg overflow-hidden shadow-sm divide-y">
-                  @for (comp of group.competitors; track comp.id; let i = $index) {
-                    <div class="flex items-center gap-3 p-3" [class.bg-primary/10]="comp.id === c.id">
-                      <span class="w-6 text-center font-bold shrink-0">{{ i + 1 }}</span>
-                      <span class="flex-1 min-w-0 font-medium break-words">
-                        {{ comp.name }}
-                        @if (comp.id === c.id) {
-                          <span class="text-xs text-muted-foreground">(Du)</span>
-                        }
-                      </span>
-                      <div class="flex gap-3 shrink-0 text-center leading-tight">
-                        <div class="w-9">
-                          <div class="font-bold text-sm">{{ comp.matchPoints }}</div>
-                          <div class="text-[10px] uppercase text-muted-foreground">MP</div>
-                        </div>
-                        <div class="w-10">
-                          <div class="text-sm font-mono">{{ comp.diff > 0 ? '+' : '' }}{{ comp.diff }}</div>
-                          <div class="text-[10px] uppercase text-muted-foreground">Diff</div>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-
-                <!-- Desktop: Tabelle -->
-                <div hlmTableContainer class="hidden md:block border rounded-lg overflow-hidden shadow-sm">
-                  <table hlmTable>
-                    <thead hlmTHead>
-                      <tr hlmTr>
-                        <th hlmTh class="w-12 text-center">#</th>
-                        <th hlmTh>Name</th>
-                        <th hlmTh class="w-20 text-center">MP</th>
-                        <th hlmTh class="w-20 text-center border-l">Diff</th>
-                      </tr>
-                    </thead>
-                    <tbody hlmTBody>
-                      @for (comp of group.competitors; track comp.id; let i = $index) {
-                        <tr hlmTr [class.bg-primary/10]="comp.id === c.id">
-                          <td hlmTd class="w-12 text-center font-bold">{{ i + 1 }}</td>
-                          <td hlmTd class="font-medium">
-                            {{ comp.name }}
-                            @if (comp.id === c.id) {
-                              <span class="text-xs text-muted-foreground ml-1">(Du)</span>
-                            }
-                          </td>
-                          <td hlmTd class="w-20 text-center font-bold">{{ comp.matchPoints }}</td>
-                          <td hlmTd class="w-20 text-center font-mono border-l">
-                            {{ comp.diff > 0 ? '+' : '' }}{{ comp.diff }}
-                          </td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
+                <app-group-standings [group]="group" [highlightId]="c.id" />
               </div>
             } @empty {
               <div class="py-12 text-center border-2 border-dashed rounded-xl text-muted-foreground italic">

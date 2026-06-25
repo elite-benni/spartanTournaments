@@ -73,12 +73,6 @@ import { MyTeamService } from '../shared/my-team.service';
                 class="text-sm font-medium transition-colors hover:text-primary"
                 >Gruppen</a
               >
-              <a
-                routerLink="/results"
-                routerLinkActive="text-primary"
-                class="text-sm font-medium transition-colors hover:text-primary"
-                >Ergebnisse</a
-              >
             </div>
           </div>
 
@@ -215,12 +209,6 @@ import { MyTeamService } from '../shared/my-team.service';
               routerLinkActive="bg-accent"
               class="block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
               >Gruppen</a
-            >
-            <a
-              routerLink="/results"
-              routerLinkActive="bg-accent"
-              class="block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-              >Ergebnisse</a
             >
             @if (role() === 'admin') {
               <a

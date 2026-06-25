@@ -2,7 +2,7 @@ import { Component, inject, computed, signal, effect, ChangeDetectionStrategy } 
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmInput } from '@spartan-ng/helm/input';
@@ -164,11 +164,9 @@ export default class RefereeScoreEntryPage {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
 
-  // Where to return after saving/cancelling, based on where we came from.
-  // Defaults to the Spielplan, which is now the referee's entry point.
-  protected returnUrl = this.route.snapshot.queryParamMap.get('from') === 'results' ? '/results' : '/gameplan';
+  // Where to return after saving/cancelling. The Spielplan is the referee's entry point.
+  protected returnUrl = '/gameplan';
 
   protected isGroups = isGroups;
 

@@ -5,7 +5,7 @@ import { filter, map, startWith } from 'rxjs';
 import { MyTeamService } from '../shared/my-team.service';
 
 /**
- * Mobile-only bottom navigation: Spielplan / Mein Team / Ergebnisse.
+ * Mobile-only bottom navigation: Mein Team / Gruppen / Spielplan.
  *
  * "Mein Team" routes to the visitor's starred team (if any) or to the team
  * picker otherwise. Hidden on md+ where the top navbar carries the same links.
