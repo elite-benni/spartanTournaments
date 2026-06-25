@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, afterNextRender } from '@angular/core';
+import { Injectable, signal, afterNextRender } from '@angular/core';
 
 /** The team a visitor has marked as "their" team (Mein Team). */
 export interface MyTeam {
