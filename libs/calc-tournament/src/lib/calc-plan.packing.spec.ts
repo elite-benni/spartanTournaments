@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CalcPlan, getPairingsForGroup } from './calc-plan';
 import { calcGroups } from './calc-groups';
-import { CalcCompetitor, CalcGroup, CalcPairing, CalcTournamentDetails } from '../models/models';
+import { CalcCompetitor, CalcPairing, CalcTournamentDetails } from '../models/models';
 
 /**
  * Tests for the schedule packer (features #1 lane-utilisation and #4 draw-number

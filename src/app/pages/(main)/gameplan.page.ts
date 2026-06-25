@@ -130,23 +130,17 @@ type StatusFilter = 'all' | 'open' | 'played';
             <!-- Matchup -->
             <div class="relative px-4 py-4 space-y-1 text-center">
               @if (p.competitor1 && p.competitor1.id && p.competitor1.id > 0) {
-                <a
-                  [routerLink]="['/competitor', p.competitor1.id]"
-                  class="block font-semibold break-words hover:underline hover:text-primary transition-colors"
-                >
+                <span class="block font-semibold break-words">
                   {{ p.competitor1.name }}
-                </a>
+                </span>
               } @else {
                 <span class="block font-semibold text-muted-foreground italic">Offen</span>
               }
               <span class="block text-muted-foreground/50 text-xs font-black italic">VS</span>
               @if (p.competitor2 && p.competitor2.id && p.competitor2.id > 0) {
-                <a
-                  [routerLink]="['/competitor', p.competitor2.id]"
-                  class="block font-semibold break-words hover:underline hover:text-primary transition-colors"
-                >
+                <span class="block font-semibold break-words">
                   {{ p.competitor2.name }}
-                </a>
+                </span>
               } @else {
                 <span class="block font-semibold text-muted-foreground italic">Offen</span>
               }
@@ -194,25 +188,17 @@ type StatusFilter = 'all' | 'open' | 'played';
                 <td hlmTd>
                   <div class="flex items-center gap-3">
                     @if (p.competitor1 && p.competitor1.id && p.competitor1.id > 0) {
-                      <a
-                        [routerLink]="['/competitor', p.competitor1.id]"
-                        [title]="p.competitor1.name"
-                        class="flex-1 min-w-0 text-right font-semibold truncate hover:underline hover:text-primary transition-colors"
-                      >
+                      <span [title]="p.competitor1.name" class="flex-1 min-w-0 text-right font-semibold truncate">
                         {{ p.competitor1.name }}
-                      </a>
+                      </span>
                     } @else {
                       <span class="flex-1 min-w-0 text-right font-semibold text-muted-foreground italic">Offen</span>
                     }
                     <span class="shrink-0 text-muted-foreground/50 text-xs font-black italic">VS</span>
                     @if (p.competitor2 && p.competitor2.id && p.competitor2.id > 0) {
-                      <a
-                        [routerLink]="['/competitor', p.competitor2.id]"
-                        [title]="p.competitor2.name"
-                        class="flex-1 min-w-0 font-semibold truncate hover:underline hover:text-primary transition-colors"
-                      >
+                      <span [title]="p.competitor2.name" class="flex-1 min-w-0 font-semibold truncate">
                         {{ p.competitor2.name }}
-                      </a>
+                      </span>
                     } @else {
                       <span class="flex-1 min-w-0 font-semibold text-muted-foreground italic">Offen</span>
                     }
