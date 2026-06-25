@@ -22,7 +22,7 @@ services:
 
   # ---- dev half (built from git with the `dev` setup; a working dev env to iterate on) ----
   - hostname: appdev
-    type: nodejs@22
+    type: nodejs@24
     priority: 5
     buildFromGit: https://github.com/fxck/spartanTournaments
     zeropsSetup: dev
@@ -34,7 +34,7 @@ services:
 
   # ---- stage half (built from git with the `prod` setup; running reference) ----
   - hostname: appstage
-    type: nodejs@22
+    type: nodejs@24
     priority: 5
     buildFromGit: https://github.com/fxck/spartanTournaments
     zeropsSetup: prod

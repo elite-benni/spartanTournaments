@@ -5,13 +5,13 @@ zerops:
   # No health checks on dev — they belong on prod only.
   - setup: dev
     build:
-      base: nodejs@22
+      base: nodejs@24
       buildCommands:
         - pnpm i
       deployFiles:
         - ./
     run:
-      base: nodejs@22
+      base: nodejs@24
       envVariables:
         DATABASE_URL: ${db_connectionString}/${db_dbName}
         NODE_ENV: development
@@ -26,7 +26,7 @@ zerops:
   # Cross-deploy / buildFromGit, so deployFiles cherry-picks the build output.
   - setup: prod
     build:
-      base: nodejs@22
+      base: nodejs@24
       buildCommands:
         - pnpm i
         - pnpm run build
@@ -42,7 +42,7 @@ zerops:
           port: 3000
           path: /health
     run:
-      base: nodejs@22
+      base: nodejs@24
       envVariables:
         DATABASE_URL: ${db_connectionString}/${db_dbName}
         NODE_ENV: production
