@@ -18,7 +18,16 @@ import { SimpleDialogService } from '../shared/simple-dialog/simple-dialog.servi
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-setup',
-  imports: [CommonModule, ReactiveFormsModule, HlmButton, HlmInput, HlmLabel, ...HlmCardImports, ...HlmDatePickerImports, ...HlmFieldImports],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HlmButton,
+    HlmInput,
+    HlmLabel,
+    ...HlmCardImports,
+    ...HlmDatePickerImports,
+    ...HlmFieldImports,
+  ],
   template: `
     <div class="flex justify-center items-center min-h-screen p-4 bg-muted/40">
       <section hlmCard class="w-full max-w-2xl">

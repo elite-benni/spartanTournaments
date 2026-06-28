@@ -34,10 +34,10 @@ zerops:
         # so prod applies migrations without shipping the root node_modules.
         - pnpm dlx esbuild tools/migrate.ts --bundle --platform=node --format=esm --outfile=dist/migrate.mjs
       deployFiles:
-        - dist                # self-contained Nitro server + bundled migrate.mjs
-        - drizzle             # SQL migration files read by the migrator at boot
+        - dist # self-contained Nitro server + bundled migrate.mjs
+        - drizzle # SQL migration files read by the migrator at boot
     deploy:
-      readinessCheck:         # gates deploy cutover until GET /health answers
+      readinessCheck: # gates deploy cutover until GET /health answers
         httpGet:
           port: 3000
           path: /health
@@ -52,7 +52,7 @@ zerops:
       initCommands:
         - zsc execOnce ${appVersionId} --retryUntilSuccessful -- node dist/migrate.mjs
       start: node dist/analog/server/index.mjs
-      healthCheck:            # continuous; LB drops/restarts a container that stops answering
+      healthCheck: # continuous; LB drops/restarts a container that stops answering
         httpGet:
           port: 3000
           path: /health
