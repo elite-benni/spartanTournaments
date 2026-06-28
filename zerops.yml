@@ -1,20 +1,48 @@
 zerops:
-  - setup: ssr
+  # ── dev ───────────────────────────────────────────────────────────
+  # Used by appdev (zeropsSetup: dev). Self-deploy → deployFiles MUST be [.].
+  # No --max-old-space-size: Node 22 auto-sizes the heap from the cgroup limit.
+  # No health checks on dev — they belong on prod only.
+  - setup: dev
     build:
-      base: nodejs@22
+      base: nodejs@24
+      buildCommands:
+        - pnpm i
+      deployFiles:
+        - ./
+    run:
+      base: nodejs@24
       envVariables:
-        NODE_OPTIONS: --max-old-space-size=8192
+        DATABASE_URL: ${db_connectionString}/${db_dbName}
+        NODE_ENV: development
+      ports:
+        - port: 3000
+          httpSupport: true
+      initCommands:
+        - zsc execOnce ${appVersionId} --retryUntilSuccessful -- ./node_modules/.bin/drizzle-kit migrate
+
+  # ── prod ──────────────────────────────────────────────────────────
+  # Used by appstage + the recipe's app / appstage services (zeropsSetup: prod).
+  # Cross-deploy / buildFromGit, so deployFiles cherry-picks the build output.
+  - setup: prod
+    build:
+      base: nodejs@24
       buildCommands:
         - pnpm i
         - pnpm run build
+        # Bundle a standalone migrator (drizzle-orm migrate() + postgres inlined)
+        # so prod applies migrations without shipping the root node_modules.
+        - pnpm dlx esbuild tools/migrate.ts --bundle --platform=node --format=esm --outfile=dist/migrate.mjs
       deployFiles:
-        - node_modules
-        - dist
-        - drizzle
-        - drizzle.config.ts
-        - package.json
+        - dist                # self-contained Nitro server + bundled migrate.mjs
+        - drizzle             # SQL migration files read by the migrator at boot
+    deploy:
+      readinessCheck:         # gates deploy cutover until GET /health answers
+        httpGet:
+          port: 3000
+          path: /health
     run:
-      base: nodejs@22
+      base: nodejs@24
       envVariables:
         DATABASE_URL: ${db_connectionString}/${db_dbName}
         NODE_ENV: production
@@ -22,5 +50,9 @@ zerops:
         - port: 3000
           httpSupport: true
       initCommands:
-        - ./node_modules/.bin/drizzle-kit migrate
+        - zsc execOnce ${appVersionId} --retryUntilSuccessful -- node dist/migrate.mjs
       start: node dist/analog/server/index.mjs
+      healthCheck:            # continuous; LB drops/restarts a container that stops answering
+        httpGet:
+          port: 3000
+          path: /health
