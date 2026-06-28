@@ -7,6 +7,8 @@ import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmLabel } from '@spartan-ng/helm/label';
 import { HlmCardImports } from '@spartan-ng/helm/card';
+import { HlmDatePickerImports } from '@spartan-ng/helm/date-picker';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { lastValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -16,7 +18,7 @@ import { SimpleDialogService } from '../shared/simple-dialog/simple-dialog.servi
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-setup',
-  imports: [CommonModule, ReactiveFormsModule, HlmButton, HlmInput, HlmLabel, ...HlmCardImports],
+  imports: [CommonModule, ReactiveFormsModule, HlmButton, HlmInput, HlmLabel, ...HlmCardImports, ...HlmDatePickerImports, ...HlmFieldImports],
   template: `
     <div class="flex justify-center items-center min-h-screen p-4 bg-muted/40">
       <section hlmCard class="w-full max-w-2xl">
@@ -58,13 +60,51 @@ import { SimpleDialogService } from '../shared/simple-dialog/simple-dialog.servi
             </div>
 
             <div class="grid gap-2">
-              <label hlmLabel for="tournamentStartTime">Turnier Startzeit</label>
-              <input hlmInput type="datetime-local" id="tournamentStartTime" formControlName="tournamentStartTime" />
+              <label hlmLabel>Turnier Startzeit</label>
+              <hlm-field-group class="flex-row">
+                <hlm-field>
+                  <label hlmFieldLabel for="tournamentStartDate">Datum</label>
+                  <hlm-date-picker formControlName="tournamentStartDate">
+                    <hlm-date-picker-trigger buttonId="tournamentStartDate">Datum wählen</hlm-date-picker-trigger>
+                  </hlm-date-picker>
+                </hlm-field>
+                <hlm-field>
+                  <label hlmFieldLabel for="tournamentStartTimeInput">Uhrzeit</label>
+                  <input
+                    hlmInput
+                    id="tournamentStartTimeInput"
+                    type="time"
+                    step="60"
+                    class="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                    [value]="tournamentTime()"
+                    (change)="tournamentTime.set($any($event.target).value)"
+                  />
+                </hlm-field>
+              </hlm-field-group>
             </div>
 
             <div class="grid gap-2">
-              <label hlmLabel for="finalsStartTime">Finalspiele Startzeit</label>
-              <input hlmInput type="datetime-local" id="finalsStartTime" formControlName="finalsStartTime" />
+              <label hlmLabel>Finalspiele Startzeit</label>
+              <hlm-field-group class="flex-row">
+                <hlm-field>
+                  <label hlmFieldLabel for="finalsStartDate">Datum</label>
+                  <hlm-date-picker formControlName="finalsStartDate">
+                    <hlm-date-picker-trigger buttonId="finalsStartDate">Datum wählen</hlm-date-picker-trigger>
+                  </hlm-date-picker>
+                </hlm-field>
+                <hlm-field>
+                  <label hlmFieldLabel for="finalsStartTimeInput">Uhrzeit</label>
+                  <input
+                    hlmInput
+                    id="finalsStartTimeInput"
+                    type="time"
+                    step="60"
+                    class="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                    [value]="finalsTime()"
+                    (change)="finalsTime.set($any($event.target).value)"
+                  />
+                </hlm-field>
+              </hlm-field-group>
             </div>
           </div>
 
@@ -102,6 +142,8 @@ export default class SetupPage {
 
   data = toSignal(injectLoad<typeof load>());
   loading = signal(false);
+  tournamentTime = signal('10:00');
+  finalsTime = signal('10:00');
 
   setupForm = this.fb.group({
     name: ['', Validators.required],
@@ -109,8 +151,8 @@ export default class SetupPage {
     minutesPerGame: [15, [Validators.required, Validators.min(1)]],
     minutesAvailForGroupsPhase: [120, [Validators.required, Validators.min(1)]],
     finalistCount: [4, [Validators.required, Validators.min(2)]],
-    tournamentStartTime: ['', Validators.required],
-    finalsStartTime: ['', Validators.required],
+    tournamentStartDate: [null as Date | null, Validators.required],
+    finalsStartDate: [null as Date | null, Validators.required],
     adminPassword: ['', [Validators.required, Validators.minLength(4)]],
     refereePassword: ['', [Validators.required, Validators.minLength(4)]],
   });
@@ -129,12 +171,17 @@ export default class SetupPage {
     if (this.setupForm.invalid) return;
     this.loading.set(true);
     try {
+      const combineDateTime = (date: Date, time: string): string => {
+        const [hours, minutes] = time.split(':').map(Number);
+        const result = new Date(date);
+        result.setHours(hours, minutes, 0, 0);
+        return result.toISOString();
+      };
+      const { tournamentStartDate, finalsStartDate, ...rest } = this.setupForm.value;
       const payload = {
-        ...this.setupForm.value,
-        // datetime-local is local wall-clock; convert to a true instant in the
-        // browser (= venue) timezone so storage is correct on any server.
-        tournamentStartTime: new Date(this.setupForm.value.tournamentStartTime!).toISOString(),
-        finalsStartTime: new Date(this.setupForm.value.finalsStartTime!).toISOString(),
+        ...rest,
+        tournamentStartTime: combineDateTime(tournamentStartDate!, this.tournamentTime()),
+        finalsStartTime: combineDateTime(finalsStartDate!, this.finalsTime()),
       };
       await lastValueFrom(this.http.post('/api/tournament/setup', payload));
       this.router.navigate(['/admin']);
