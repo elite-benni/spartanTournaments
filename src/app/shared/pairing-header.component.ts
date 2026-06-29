@@ -27,7 +27,7 @@ export type PairingHeaderData = {
   selector: 'app-pairing-header',
   imports: [DatePipe],
   template: `
-    <div class="flex items-stretch border-b bg-muted/30">
+    <div class="flex items-stretch border-b border-border/40 bg-muted/40 backdrop-blur-xs">
       <div class="flex-1 flex items-center gap-2 min-w-0 px-4 py-2.5">
         <span class="flex items-center gap-1.5 text-primary shrink-0">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -41,7 +41,7 @@ export type PairingHeaderData = {
           <span class="text-sm font-bold tabular-nums leading-none">{{ pairing().startTime | date: 'HH:mm' }}</span>
         </span>
         <span
-          class="px-2 py-0.5 rounded font-bold text-xs shrink-0"
+          class="px-2 py-0.5 rounded font-black text-[10px] uppercase tracking-wider shrink-0"
           [class.bg-secondary]="!isFinals()"
           [class.text-secondary-foreground]="!isFinals()"
           [class.bg-primary]="isFinals()"
@@ -51,8 +51,8 @@ export type PairingHeaderData = {
         </span>
         <ng-content />
       </div>
-      <div class="flex items-center px-4 py-2.5 border-l bg-card shrink-0">
-        <span class="text-sm font-bold leading-none tracking-tight text-muted-foreground"
+      <div class="flex items-center px-4 py-2.5 border-l border-border/40 bg-card/60 backdrop-blur-xs shrink-0">
+        <span class="text-xs font-bold leading-none tracking-wide text-muted-foreground uppercase"
           >Bahn {{ pairing().court }}</span
         >
       </div>

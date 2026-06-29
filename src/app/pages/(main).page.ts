@@ -16,7 +16,7 @@ export const routeMeta = defineRouteMeta({
   template: `
     <app-navbar />
     <!-- Extra bottom padding on mobile clears the fixed bottom nav (incl. safe-area). -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-22 md:pb-8">
       <router-outlet />
     </main>
     <app-bottom-nav />

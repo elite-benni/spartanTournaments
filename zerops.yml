@@ -21,6 +21,40 @@ zerops:
       initCommands:
         - zsc execOnce ${appVersionId} --retryUntilSuccessful -- ./node_modules/.bin/drizzle-kit migrate
 
+  # ── ssr ───────────────────────────────────────────────────────────
+  # Used by the ssr service (zeropsSetup: ssr). Alias for prod config.
+  # Cross-deploy / buildFromGit, so deployFiles cherry-picks the build output.
+  - setup: ssr
+    build:
+      base: nodejs@24
+      buildCommands:
+        - pnpm i
+        - pnpm run build
+        - pnpm dlx esbuild tools/migrate.ts --bundle --platform=node --format=esm --outfile=dist/migrate.mjs
+      deployFiles:
+        - dist
+        - drizzle
+    deploy:
+      readinessCheck:
+        httpGet:
+          port: 3000
+          path: /health
+    run:
+      base: nodejs@24
+      envVariables:
+        DATABASE_URL: ${db_connectionString}/${db_dbName}
+        NODE_ENV: production
+      ports:
+        - port: 3000
+          httpSupport: true
+      initCommands:
+        - zsc execOnce ${appVersionId} --retryUntilSuccessful -- node dist/migrate.mjs
+      start: node dist/analog/server/index.mjs
+      healthCheck:
+        httpGet:
+          port: 3000
+          path: /health
+
   # ── prod ──────────────────────────────────────────────────────────
   # Used by appstage + the recipe's app / appstage services (zeropsSetup: prod).
   # Cross-deploy / buildFromGit, so deployFiles cherry-picks the build output.

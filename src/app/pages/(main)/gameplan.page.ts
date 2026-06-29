@@ -29,7 +29,7 @@ type StatusFilter = 'all' | 'open' | 'played';
       </header>
 
       <!-- Filter -->
-      <div class="rounded-xl border bg-card shadow-sm p-4">
+      <div class="glass-panel rounded-2xl shadow-sm p-4">
         <div class="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
           <div class="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
             Status
@@ -108,7 +108,7 @@ type StatusFilter = 'all' | 'open' | 'played';
       <!-- Mobile: Karten-Ansicht (Namen untereinander, brechen sauber um) -->
       <div class="space-y-3 md:hidden">
         @for (p of pairings(); track p.id) {
-          <div class="border rounded-xl shadow-sm overflow-hidden" [class]="isFinals(p) ? 'bg-primary/5' : 'bg-card'">
+          <div class="glass-panel rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.01]">
             <!-- Header band: time (primary accent) + phase/group left, court in its own panel right -->
             <app-pairing-header [pairing]="p">
               <span class="flex-1 flex justify-center min-w-0">

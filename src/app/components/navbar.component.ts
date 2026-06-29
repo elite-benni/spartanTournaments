@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, effect, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -118,130 +118,30 @@ import { MyTeamService } from '../shared/my-team.service';
               }
             </button>
             @if (role() === 'admin') {
-              <a hlmBtn variant="outline" size="sm" routerLink="/admin" class="hidden md:inline-flex">Admin</a>
+              <a hlmBtn variant="outline" size="sm" routerLink="/admin" class="px-2.5 h-8 text-xs gap-1 border-primary/40 hover:border-primary/80">
+                <svg class="h-3.5 w-3.5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.888.282 2.035-.536 2.572-1.372.909-1.372 2.91 0 3.82.818.537 1.077 1.684.536 2.572-.836 1.372.734 2.942 2.106 2.106a1.533 1.533 0 012.287.947c.379 1.56 2.6 1.56 2.98 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.536-2.572c1.372-.909 1.372-2.91 0-3.82a1.533 1.533 0 01-.536-2.572c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                </svg>
+                <span class="hidden sm:inline">Admin</span>
+              </a>
             }
             @if (role()) {
-              <button hlmBtn variant="ghost" size="sm" (click)="logout()" class="hidden md:inline-flex">Logout</button>
+              <button hlmBtn variant="ghost" size="sm" (click)="logout()" class="px-2.5 h-8 text-xs gap-1" title="Logout">
+                <svg class="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span class="hidden sm:inline">Logout</span>
+              </button>
             } @else {
-              <a hlmBtn variant="ghost" size="sm" routerLink="/login" class="hidden md:inline-flex">Login</a>
+              <a hlmBtn variant="ghost" size="sm" routerLink="/login" class="px-2.5 h-8 text-xs gap-1">
+                <svg class="h-3.5 w-3.5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Login</span>
+              </a>
             }
-
-            <!-- Mobile hamburger -->
-            <button
-              class="md:hidden p-2 rounded-md hover:bg-accent transition-colors"
-              (click)="mobileOpen.set(!mobileOpen())"
-            >
-              @if (mobileOpen()) {
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              } @else {
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              }
-            </button>
           </div>
         </div>
-
-        <!-- Mobile dropdown -->
-        @if (mobileOpen()) {
-          <!-- Wrapper closes the menu when a focusable child link/button is activated (mouse or keyboard). -->
-          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
-          <div class="md:hidden border-t py-4 space-y-1" (click)="mobileOpen.set(false)">
-            <a
-              routerLink="/"
-              routerLinkActive="bg-accent"
-              [routerLinkActiveOptions]="{ exact: true }"
-              class="block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-              >Home</a
-            >
-            <button
-              type="button"
-              (click)="goToMyTeam()"
-              class="flex w-full items-center gap-2 text-left px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-              [class.bg-accent]="isTeamActive()"
-            >
-              @if (team()) {
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path
-                    d="M11.48 3.5a.56.56 0 011.04 0l2.12 4.92 5.34.46c.49.04.69.66.31.99l-4.05 3.51 1.21 5.22c.11.48-.41.86-.83.6L12 16.9l-4.62 2.8c-.42.26-.94-.12-.83-.6l1.21-5.22-4.05-3.51c-.38-.33-.18-.95.31-.99l5.34-.46L11.48 3.5z"
-                  />
-                </svg>
-              } @else {
-                <svg
-                  class="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M11.48 3.5a.56.56 0 011.04 0l2.12 4.92 5.34.46c.49.04.69.66.31.99l-4.05 3.51 1.21 5.22c.11.48-.41.86-.83.6L12 16.9l-4.62 2.8c-.42.26-.94-.12-.83-.6l1.21-5.22-4.05-3.51c-.38-.33-.18-.95.31-.99l5.34-.46L11.48 3.5z"
-                  />
-                </svg>
-              }
-              Mein Team
-            </button>
-            <a
-              routerLink="/gameplan"
-              routerLinkActive="bg-accent"
-              class="block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-              >Spielplan</a
-            >
-            <a
-              routerLink="/groups"
-              routerLinkActive="bg-accent"
-              class="block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-              >Gruppen</a
-            >
-            @if (role() === 'admin') {
-              <a
-                routerLink="/admin"
-                routerLinkActive="bg-accent"
-                class="block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-                >Admin</a
-              >
-            }
-            <div class="pt-2 border-t mt-2">
-              <button
-                class="w-full text-left px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-                (click)="theme.toggle()"
-              >
-                {{ theme.theme() === 'dark' ? 'Heller Modus' : 'Dunkler Modus' }}
-              </button>
-              @if (role()) {
-                <button
-                  class="w-full text-left px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-                  (click)="logout()"
-                >
-                  Logout
-                </button>
-              } @else {
-                <a
-                  routerLink="/login"
-                  class="block px-3 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
-                  >Login</a
-                >
-              }
-            </div>
-          </div>
-        }
       </div>
     </nav>
   `,
@@ -272,14 +172,12 @@ export class NavbarComponent {
   });
 
   protected goToMyTeam() {
-    this.mobileOpen.set(false);
     const t = this.team();
     this.router.navigateByUrl(t ? `/competitor/${t.id}` : '/team');
   }
 
   private _session = toSignal(this.http.get<{ role: 'admin' | 'referee' | null }>('/api/auth/session'));
   role = computed(() => this._session()?.role ?? null);
-  mobileOpen = signal(false);
 
   private _tournament = toSignal(this.http.get<{ tournament: { name: string } | null }>('/api/tournament'));
   tournamentName = computed(() => this._tournament()?.tournament?.name ?? 'spartanTournaments');

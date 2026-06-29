@@ -18,9 +18,9 @@ import type { load } from './groups.server';
 
       <div class="grid gap-12 lg:grid-cols-2">
         @for (group of groupList(); track group.id) {
-          <div class="border rounded-xl shadow-sm overflow-hidden bg-card">
+          <div class="glass-panel rounded-2xl overflow-hidden shadow-sm">
             <!-- Header band: matches the cards on gameplan -->
-            <div class="border-b bg-muted/30 px-4 py-2.5">
+            <div class="border-b border-border/40 bg-muted/40 backdrop-blur-xs px-4 py-2.5">
               <h2 class="text-lg font-bold leading-none text-primary">Gruppe {{ group.id }}</h2>
             </div>
 

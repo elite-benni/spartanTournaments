@@ -40,9 +40,9 @@ export const routeMeta = defineRouteMeta({
       </a>
 
       @if (pairing(); as p) {
-        <div class="border rounded-2xl shadow-lg bg-card overflow-hidden">
+        <div class="glass-panel rounded-3xl shadow-xl overflow-hidden">
           <!-- Card Header with match details -->
-          <div class="bg-muted/40 border-b px-8 py-6 flex flex-wrap justify-between items-center gap-4">
+          <div class="bg-muted/40 border-b border-border/40 px-8 py-6 flex flex-wrap justify-between items-center gap-4">
             <div>
               <span class="text-xs font-semibold text-primary uppercase tracking-wider">Ergebnis eintragen</span>
               <h2 class="text-2xl font-bold tracking-tight mt-0.5">
@@ -149,7 +149,7 @@ export const routeMeta = defineRouteMeta({
           </form>
         </div>
       } @else {
-        <div class="text-center py-20 border-2 border-dashed rounded-2xl bg-card">
+        <div class="text-center py-20 border-2 border-dashed rounded-3xl bg-card/40 backdrop-blur-md">
           <h2 class="text-2xl font-bold">Spiel nicht gefunden</h2>
           <p class="text-muted-foreground mt-2">
             Das gesuchte Spiel existiert nicht oder Sie haben eine ungültige ID aufgerufen.
