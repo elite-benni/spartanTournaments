@@ -24,7 +24,7 @@ services:
   - hostname: appdev
     type: nodejs@24
     priority: 5
-    buildFromGit: https://github.com/fxck/spartanTournaments
+    buildFromGit: https://github.com/elite-benni/spartanTournaments
     zeropsSetup: dev
     enableSubdomainAccess: true
     minContainers: 1
@@ -36,7 +36,7 @@ services:
   - hostname: appstage
     type: nodejs@24
     priority: 5
-    buildFromGit: https://github.com/fxck/spartanTournaments
+    buildFromGit: https://github.com/elite-benni/spartanTournaments
     zeropsSetup: prod
     enableSubdomainAccess: true
     minContainers: 1
