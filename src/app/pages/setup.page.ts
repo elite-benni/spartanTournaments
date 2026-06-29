@@ -69,7 +69,7 @@ import { SimpleDialogService } from '../shared/simple-dialog/simple-dialog.servi
             </div>
 
             <div class="grid gap-2">
-              <label hlmLabel>Turnier Startzeit</label>
+              <label hlmLabel for="tournamentStartTimeInput">Turnier Startzeit</label>
               <hlm-field-group class="flex-row">
                 <hlm-field>
                   <label hlmFieldLabel for="tournamentStartDate">Datum</label>
@@ -93,7 +93,7 @@ import { SimpleDialogService } from '../shared/simple-dialog/simple-dialog.servi
             </div>
 
             <div class="grid gap-2">
-              <label hlmLabel>Finalspiele Startzeit</label>
+              <label hlmLabel for="finalsStartTimeInput">Finalspiele Startzeit</label>
               <hlm-field-group class="flex-row">
                 <hlm-field>
                   <label hlmFieldLabel for="finalsStartDate">Datum</label>
